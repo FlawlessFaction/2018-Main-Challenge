@@ -1,4 +1,4 @@
-function Get-Random$DomainGroup {
+function Get-RandomDomainGroup {
 	[cmdletbinding()]
 	param(
 		[parameter(Mandatory)]
