@@ -1,4 +1,4 @@
-function New-MBADUser {
+function New-IronUser {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$true)]
@@ -49,7 +49,7 @@ function New-MBADUser {
             ConvertTo-NameCase takes any english name variation and converts it to the correct case format
 
             .DESCRIPTION
-            ConvertTo-NameCase takes any english name variation and converts it to the correct case, it will handle upper, lower, hyphens, and apostrophe 
+            ConvertTo-NameCase takes any english name variation and converts it to the correct case, it will handle upper, lower, hyphens, and apostrophe
 
             .PARAMETER Name
             Name The name you wish to correct in the form of a string
@@ -70,7 +70,7 @@ function New-MBADUser {
                 for ($i = 0; $i -lt $Name.Length; $i++) {
                     $NameArray[0] = ([string]$Name[0]).ToUpper()
                     if ($NameArray[$i] -eq '-' -or $NameArray[$i] -eq "'") {
-                        $NameArray[$i + 1] = ([string]$NameArray[$i + 1]).ToUpper() 
+                        $NameArray[$i + 1] = ([string]$NameArray[$i + 1]).ToUpper()
                         $i++ #Tell the loop to skip the next itteration
                     } else {
                         $NameArray[$i] = ([string]$Name[$i]).ToLower()
@@ -98,7 +98,7 @@ function New-MBADUser {
                 $true #Return true if no account exists
             }
         }
-        
+
         #Actual Code
         foreach ($Obj in $users) {
             Write-Verbose "Working on $($Obj.FirstName) $($Obj.Lastname)"
@@ -108,7 +108,7 @@ function New-MBADUser {
 
             #Rewrite the usersname surname with a - instead of a space
             $Obj.lastname = $Obj.lastname -replace ' ','-'
-            
+
             if ($Obj.MiddleName -notlike $null) {
                 #Middle name and trim to 18 characters, and replace hyphens with null
                 $samaccountname = ("$($Obj.Firstname.substring(0,1).tolower().Trim())$($Obj.MiddleName.substring(0,1).tolower().Trim())$($Obj.LastName.tolower().Trim())"[0..17] -join '') -replace '-', ''
@@ -127,7 +127,7 @@ function New-MBADUser {
                     do {
                         if ($samaccountname[-1] -match "[0-9]") {
                             Write-Verbose 'The existing samaccountname is already an increment, we will do addition here'
-                
+
                             #Take the existing account and increment and increment by 1
                             $i++
                             $samaccountname = "$($samaccountname -replace "[0-9]", '')$([int]($samaccountname -replace "[a-z]", '') + $i)"
@@ -157,7 +157,7 @@ function New-MBADUser {
                     do {
                         if ($UserPrincipalNamePrefix[-1] -match "[0-9]") {
                             Write-Verbose 'The existing upn is already an increment, we will do addition here'
-                
+
                             #Take the existing account and increment and increment by 1
                             $i++
                             $UserPrincipalName = "$($UserPrincipalNamePrefix -replace "[0-9]", "$i")@ministrybrands.com"
@@ -167,7 +167,7 @@ function New-MBADUser {
                         }
                     } until ((Test-ForExistingUPN -UserPrincipalName $UserPrincipalName -DC $DC) -eq $true)
                 }
-                
+
                 #Find the users reporting manager
                 $ReportingManager = $obj.ReportsTo.Trim().split(',').Trim()
                 $ReportingManager = $users | Where-Object {($PSItem.Firstname -eq $ReportingManager[-1]) -and ($PSItem.LastName -eq $ReportingManager[0])} | Select-Object -First 1 -ExpandProperty EmployeeNumber
@@ -182,7 +182,7 @@ function New-MBADUser {
                 } Catch {
                     Write-Error 'Failed to add the proxy address to the ArrayList'
                 }
-                
+
                 #Random account password
                 $AccountPassword = "$($Password)$(New-RandomComplexPassword)"
 
@@ -194,7 +194,7 @@ function New-MBADUser {
 
                 #Build the properties hashtable so we can splat it below
                 $Props = @{
-                    samaccountname = $samaccountname 
+                    samaccountname = $samaccountname
                     Enabled = $true
                     AccountPassword = ConvertTo-SecureString $AccountPassword -AsPlainText -Force
                     Name = $UserObject.Name
@@ -202,7 +202,7 @@ function New-MBADUser {
                     Emailaddress = $UserPrincipalName
                     Path = "OU=staging,dc=ministrybrands,dc=com"
                     DisplayName = $UserObject.DisplayName
-                    Employeeid = $obj.EmployeeNumber   
+                    Employeeid = $obj.EmployeeNumber
                     GivenName = $UserObject.GivenName
                     Surname = $UserObject.Surname
                     Title = $Obj.JobTitle.Trim()
