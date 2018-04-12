@@ -1,7 +1,10 @@
-function Get-RandomDomainGroup {
+function Get-Random$DomainGroup {
 	[cmdletbinding()]
-	param()
-	$DomainGroups = @('domaingroup1', 'domaingroup2', 'domaingroup3', 'domaingroup4')
+	param(
+		[parameter(Mandatory)]
+		[string]$Domain
+	)
+	$DomainGroups = @($Domain + "group1", $Domain + "group2", $Domain + "group3", $Domain + "group4")
 	$index = Get-Random -Minimum 0 -Maximum 4
 	$DomainGroups[$index]
 }
